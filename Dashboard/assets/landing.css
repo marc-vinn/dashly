@@ -1,0 +1,144 @@
+/* Configuração do Fundo da Landing Page */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'SF Pro', 'Inter', sans-serif;
+}
+
+/* Isolando o fundo para não afetar o dashboard caso não recarregue a página */
+.landing-body {
+    overflow: hidden; /* Evita scroll durante a interação */
+    background-color: #ececec; /* Tom claro/off-white conforme especificado */
+    color: #1A1D21;
+}
+
+#particleCanvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0; /* Atrás do texto */
+    pointer-events: none; /* Garante que cliques passem para os botões */
+}
+
+.landing-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    text-align: center;
+    pointer-events: auto;
+}
+
+/* Tipografia Estilo AntiGravity / Apple */
+.landing-h1 {
+    font-size: 3.5rem;
+    font-weight: 600;
+    letter-spacing: -1.5px;
+    background: linear-gradient(to bottom, #1A1D21, #717680);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    max-width: 800px;
+    margin-bottom: 2rem;
+}
+
+.dashly-highlight {
+    /* Isola o span do background-clip: text do pai para a cor funcionar */
+    background: none;
+    -webkit-background-clip: unset;
+    background-clip: unset;
+    -webkit-text-fill-color: #9858f1 !important;
+    color: #9858f1 !important;
+    font-weight: 800;
+}
+
+/* Glass Button Container */
+.glass-button {
+  --bg-color: rgba(255, 255, 255, 0.25);
+  --highlight: rgba(255, 255, 255, 0.75);
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  position: relative;
+  padding: 14px 32px;
+  min-height: 52px;
+  min-width: 180px;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  overflow: hidden;
+  background: transparent;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  outline: none;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+}
+
+.glass-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 32px rgba(152, 88, 241, 0.3);
+}
+
+.glass-button:active {
+  transform: scale(0.95);
+}
+
+.glass-filter,
+.glass-overlay,
+.glass-specular {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+.glass-filter {
+  z-index: 1;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  filter: url(#glass-distortion) saturate(120%) brightness(1.15);
+}
+
+.glass-overlay {
+  z-index: 2;
+  background: var(--bg-color);
+}
+
+.glass-specular {
+  z-index: 3;
+  box-shadow: inset 1px 1px 1px var(--highlight);
+  transition: background 0.1s ease; /* Transição sutil para o radial-gradient do JS */
+}
+
+.glass-content {
+  position: relative;
+  z-index: 4;
+  color: #1A1D21;
+  font-weight: 600;
+  font-size: 1.1rem;
+  transition: color 0.3s ease;
+}
+
+.glass-button:hover .glass-content {
+  color: #9858f1;
+}
+
+/* Dark mode styles */
+@media (prefers-color-scheme: dark) {
+  .glass-button {
+    --bg-color: rgba(0, 0, 0, 0.25);
+    --highlight: rgba(255, 255, 255, 0.15);
+  }
+  .glass-content {
+    color: #ffffff;
+  }
+}
+
+/* Esconder o canvas no Dashboard */
+.hide-canvas {
+    display: none !important;
+}

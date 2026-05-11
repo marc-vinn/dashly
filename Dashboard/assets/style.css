@@ -1,0 +1,203 @@
+/* ────────────────────────────────────────────────
+   1. TIPOGRAFIA GLOBAL
+   ──────────────────────────────────────────────── */
+*:not(i) {
+    font-family: 'SF Pro', 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+}
+.fa, .fas, .fa-solid, .fa-regular, .fab {
+    font-family: "Font Awesome 6 Free" !important;
+    font-weight: 900 !important;
+    display: inline-block !important;
+    font-style: normal !important;
+    font-variant: normal !important;
+    text-rendering: auto !important;
+    -webkit-font-smoothing: antialiased !important;
+}
+
+/* ────────────────────────────────────────────────
+   2. BASE
+   ──────────────────────────────────────────────── */
+body {
+    background-color: #F4F5F7;
+    color: #1A1D21;
+    margin: 0;
+    padding: 0;
+}
+
+/* ────────────────────────────────────────────────
+   3. TOP HEADER
+   ──────────────────────────────────────────────── */
+.top-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 24px;
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.header-logo {
+    height: 32px;
+    width: auto;
+    object-fit: contain;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.nav-top-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Botões de navegação */
+.nav-top-btn {
+    display: inline-block;
+    padding: 7px 18px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none !important;
+    cursor: pointer;
+    border: 1.5px solid #2b2b2b;
+    background: #ffffff;
+    color: #2b2b2b !important;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.nav-top-btn:hover {
+    background: #f0f0f0;
+}
+
+.nav-top-btn-active {
+    background: #2b2b2b !important;
+    color: #ffffff !important;
+}
+
+/* Nova Análise — upload wrapper */
+.nav-top-btn-nova {
+    background: #2b2b2b;
+    color: #ffffff !important;
+    border-color: #2b2b2b;
+}
+.nav-top-btn-nova:hover {
+    background: #444;
+}
+
+/* Botão de compartilhamento redondo */
+.share-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: #2b2b2b;
+    color: #ffffff;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 15px;
+    transition: transform 0.2s ease, background 0.2s ease;
+}
+.share-btn:hover {
+    background: #444;
+    transform: scale(1.08);
+}
+
+/* ────────────────────────────────────────────────
+   4. CARDS (Liquid Glass)
+   ──────────────────────────────────────────────── */
+.glass-card {
+    background-color: rgba(255, 255, 255, 0.3) !important;
+    backdrop-filter: blur(15px) !important;
+    -webkit-backdrop-filter: blur(15px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.6) !important;
+    border-radius: 24px !important;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05) !important;
+}
+
+/* Botão 3 pontinhos no card */
+.card-actions {
+    display: flex;
+    align-items: center;
+}
+.btn-three-dots {
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    color: #717680;
+    cursor: pointer;
+    padding: 2px 8px;
+    border-radius: 8px;
+    transition: background 0.15s ease;
+    line-height: 1;
+}
+.btn-three-dots:hover {
+    background: rgba(0,0,0,0.06);
+    color: #2b2b2b;
+}
+
+/* ────────────────────────────────────────────────
+   5. FILTROS (pill buttons)
+   ──────────────────────────────────────────────── */
+.filter-pill-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 4px;
+}
+.filter-pill {
+    padding: 5px 14px;
+    border-radius: 20px;
+    border: 1.5px solid #2b2b2b;
+    background: #ffffff;
+    color: #2b2b2b;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+}
+.filter-pill:hover {
+    background: #f0f0f0;
+}
+.filter-pill-active {
+    background: #2b2b2b !important;
+    color: #ffffff !important;
+}
+
+/* ────────────────────────────────────────────────
+   6. UPLOAD BOX (Nova Análise no header)
+   ──────────────────────────────────────────────── */
+.upload-box {
+    display: inline-block;
+}
+
+/* ────────────────────────────────────────────────
+   7. TAGS / PILLS
+   ──────────────────────────────────────────────── */
+.pill-tag {
+    background-color: #9858f1;
+    color: #ffffff;
+    border-radius: 12px;
+    padding: 4px 8px;
+    font-size: 11px;
+    font-weight: 600;
+}
