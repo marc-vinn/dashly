@@ -1,12 +1,6 @@
-# Dashboard de Relatórios (Clean Architecture)
+# Dashboard de Relatórios
 
 Este repositório contém a aplicação de Dashboard interativo. Ele foi refatorado focando em **Arquitetura Limpa (Clean Architecture)**, **Isolamento de Lógica** e **Segurança**.
-
-## 🛡️ Segurança e Padrões (GITTY e Coder)
-- Nenhum dado bruto é enviado ao frontend.
-- O `.gitignore` bloqueia o upload de arquivos CSV/Excel sensíveis.
-- O código segue o **Single Responsibility Principle (SRP)**.
-- Todas as features são orientadas por **Test-Driven Development (TDD)**.
 
 ## 📁 Estrutura do Projeto (Proposta)
 - `core/` (ou `domain/`): Modelos de dados e lógica pura, independente do Dash.
