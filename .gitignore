@@ -38,3 +38,7 @@ dist/
 *.rar
 *.zip
 *.dmg
+
+# Cache da aplicação (Security)
+cache_data/
+Dashboard/cache_data/
