@@ -5,7 +5,8 @@ from services.file_service import FileService
 from services.data_service import DataService
 from logic.processador import auditoria_dados, processar_estatisticas
 from components.cards import criar_bloco_pergunta, criar_card_kpi
-from pages.dashboard import layout_dashboard, layout_analises, layout_dados
+from pages.dashboard import layout_dashboard, layout_dados
+from pages.analises import layout_analises
 from pages.landing import layout_landing
 from index import get_dashboard_layout
 
@@ -118,27 +119,81 @@ def register_callbacks():
 
         return blocos, kpis
 
-    # ─── CALLBACK 5: AUDITORIA (aba Análises) ───────────────────────────────────
+    # ─── CALLBACK 5A: GERAÇÃO DE QUICK INSIGHTS (aba Análises) ───────────────────
+    from services.insight_service import InsightService
+    from dash import dcc
+    
     @callback(
-        Output('output-data-upload', 'children'),
-        Input('store-data', 'data')
+        Output('quick-insights-container', 'children'),
+        Input('store-data', 'data'),
+        Input('btn-refresh-insights', 'n_clicks')
     )
-    def exibir_auditoria_tecnica(cache_id):
+    def exibir_quick_insights(cache_id, n_clicks):
         if not cache_id:
-            return html.Div("Nenhum dado carregado.", className="text-muted")
+            return dbc.Row(dbc.Col(html.Div("Faça upload de um arquivo para ver os insights estatísticos.", className="text-muted p-3")))
 
         df = DataService.get_data(cache_id)
         if df is None:
-            return html.Div("Sessão expirada. Faça upload novamente.")
+            return dbc.Row(dbc.Col(html.Div("Sessão expirada. Faça upload novamente.", className="text-warning")))
 
-        df_auditoria = auditoria_dados(df)
-        return html.Div([
-            html.Hr(),
-            html.H5("Dicionário de Colunas", className="mb-3"),
-            dbc.Table.from_dataframe(df_auditoria, striped=True, bordered=True, size="sm"),
-            html.H5("Prévia dos Dados", className="mt-4 mb-3"),
-            dbc.Table.from_dataframe(df.head(10), striped=True, responsive=True, size="sm")
-        ])
+        # Gerar 6 insights e randomizá-los
+        regras = InsightService.generate_quick_insights(df, max_rules=6)
+        
+        cards = []
+        for i, regra in enumerate(regras):
+            card = dbc.Col(
+                dbc.Card([
+                    dbc.CardBody([
+                        html.H6(regra["title"], className="card-title", style={"color": "#732dd3", "fontWeight": "bold"}),
+                        dcc.Markdown(regra["description"], className="card-text m-0", style={"fontSize": "15px", "lineHeight": "1.5"})
+                    ], className="p-4") # Padding maior para o card ficar mais espesso
+                ], style={"borderLeft": "5px solid #732dd3", "borderRadius": "12px", "boxShadow": "0 4px 15px rgba(0,0,0,0.05)"}),
+                md=12, lg=4, # 3 cards por linha (layout maior)
+                key=f"insight-card-{i}-{n_clicks}" # Key dinâmica ajuda o React a renderizar sem falhas
+            )
+            cards.append(card)
+            
+        return dbc.Row(cards, className="g-3 mb-5")
+
+    # ─── CALLBACK 5B: AI CHAT ASSISTANT (aba Análises) ───────────────────────────
+    from services.ai_service import AIService
+    
+    @callback(
+        Output('ai-chat-output', 'children'),
+        Output('ai-chat-input', 'value'), # Limpa o input após enviar
+        Input('ai-chat-btn', 'n_clicks'),
+        State('ai-chat-input', 'value'),
+        State('store-data', 'data'),
+        prevent_initial_call=True
+    )
+    def processar_pergunta_ai(n_clicks, pergunta, cache_id):
+        if not n_clicks or not pergunta or not pergunta.strip():
+            return no_update, no_update
+            
+        if not cache_id:
+            return dbc.Alert("Faça upload de um arquivo primeiro.", color="warning"), ""
+            
+        df = DataService.get_data(cache_id)
+        if df is None:
+            return dbc.Alert("Sessão expirada. Faça upload novamente.", color="warning"), ""
+            
+        try:
+            resumo = AIService.get_data_summary(df)
+            resposta = AIService.get_ai_insights(resumo, pergunta)
+            
+            card_resposta = html.Div([
+                html.H6(html.B(f"Sua Pergunta: {pergunta}"), className="mb-3 text-secondary"),
+                dcc.Markdown(resposta, style={"color": "#1A1D21", "lineHeight": "1.6"})
+            ], className="p-4 mb-3", style={
+                "backgroundColor": "#f8f9fa", 
+                "borderRadius": "12px",
+                "borderLeft": "4px solid #732dd3",
+                "boxShadow": "0 2px 8px rgba(0,0,0,0.05)"
+            })
+            
+            return card_resposta, ""
+        except Exception as e:
+            return dbc.Alert(f"Erro ao processar a IA: {str(e)}", color="danger"), ""
 
     # ─── CALLBACK 6: TABELA DE DADOS BRUTOS ─────────────────────────────────────
     @callback(

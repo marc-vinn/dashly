@@ -17,6 +17,7 @@ def layout_landing():
             # O redirect é feito via Output('url', 'pathname') no callback — sem Location duplicado
             dcc.Upload(
                 id='upload-landing',
+                accept='.csv, .xls, .xlsx',
                 children=html.Div([
                     html.Div(className="glass-filter"),
                     html.Div(className="glass-overlay"),

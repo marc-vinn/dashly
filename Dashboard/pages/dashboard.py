@@ -24,12 +24,6 @@ def layout_dashboard():
     ], style={"paddingTop": "1.5rem"})
 
 
-def layout_analises():
-    return html.Div([
-        html.H4("Análise Estrutural dos Dados", className="mb-4", style={"color": "#1A1D21"}),
-        html.Div(id='output-data-upload', className="mt-2")
-    ], style={"paddingTop": "1.5rem"})
-
 
 def layout_dados():
     return html.Div([

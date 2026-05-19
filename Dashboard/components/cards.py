@@ -69,8 +69,14 @@ def criar_bloco_pergunta(df, coluna, info, largura, tipo_grafico):
         )
 
     elif tipo_grafico == 'pizza':
+        # 1. Adicionar porcentagens na legenda
+        total = counts['Quantidade'].sum()
+        counts['Legenda_com_Percentual'] = counts.apply(
+            lambda row: f"{row[coluna]} ({(row['Quantidade'] / total) * 100:.1f}%)", axis=1
+        )
+
         fig = px.pie(
-            counts, values='Quantidade', names=coluna,
+            counts, values='Quantidade', names='Legenda_com_Percentual',
             hole=.75,
             color_discrete_sequence=_paleta_pizza(len(counts))
         )
@@ -81,9 +87,22 @@ def criar_bloco_pergunta(df, coluna, info, largura, tipo_grafico):
             orientation="h", y=-0.2, x=0.5, xanchor="center",
             font=dict(color=COR_LEGENDA)
         )
+        
+        # 2. Cores de contraste do texto interno do gráfico
+        text_colors = []
+        for i in range(len(counts)):
+            if i == 0:
+                text_colors.append('#FFFFFF') # Fundo Roxo -> Branco
+            elif i == 1:
+                text_colors.append('#FFFFFF') # Fundo Preto -> Branco
+            elif i == 2:
+                text_colors.append(COR_PRIMARIA) # Fundo Cinza -> Roxo
+            else:
+                text_colors.append('#FFFFFF') # Outros fundos escuros -> Branco
+
         fig.update_traces(
             textinfo='percent',
-            textfont_color=COR_LEGENDA,
+            textfont_color=text_colors,
             textfont_size=11,
         )
         fig.update_layout(**layout_pizza)

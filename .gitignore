@@ -1,6 +1,7 @@
 # Ambiente Virtual Python
 .venv/
 venv/
+venv2/
 ENV/
 env/
 __pycache__/
@@ -10,6 +11,7 @@ __pycache__/
 # Variáveis de ambiente e segredos
 .env
 .env.*
+!.env.example
 *.secret
 
 # Dados sensíveis do Dashboard
