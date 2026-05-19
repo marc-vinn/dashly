@@ -22,6 +22,7 @@ def render_top_header():
     # Botão "Nova Análise" embrulhado em dcc.Upload
     nova_analise_btn = dcc.Upload(
         id='upload-data',
+        accept='.csv, .xls, .xlsx',
         children=html.Div("Nova Análise", className="nav-top-btn nav-top-btn-nova"),
         multiple=False,
         style={"display": "inline-block"}
@@ -38,7 +39,7 @@ def render_top_header():
         # Lado esquerdo: logo + navegação
         html.Div([
             dcc.Link(
-                html.Img(src="/assets/logo.png", className="header-logo"),
+                html.Img(src="/assets/dashly.png", className="header-logo"),
                 href="/",
                 style={"textDecoration": "none"}
             ),

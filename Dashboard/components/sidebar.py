@@ -11,7 +11,7 @@ def render_sidebar():
         },
         children=[
             # Logo
-            html.Img(src="/assets/logo.png", style={"width": "100%", "marginBottom": "25px"}),
+            html.Img(src="/assets/dashly.png", style={"width": "100%", "marginBottom": "25px"}),
 
             # Texto de Instrução
             html.P("Carregue sua planilha para começar",
