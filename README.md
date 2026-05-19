@@ -9,7 +9,6 @@ Dashboard interativo construído com **Dash + Plotly** que transforma planilhas 
 - **Quick Insights** — algoritmo Apriori para detecção de correlações estatísticas
 - **AI Assistant** — chat com IA (DeepSeek via OpenRouter) com guardrails anti-escopo
 - **Exportação** — PDF completo do dashboard e PNG individual de cada gráfico
-- **UI Liquid Glass** — design inspirado no Apple glassmorphism
 
 ## 📁 Estrutura do Projeto
 
@@ -26,54 +25,6 @@ Dashboard/
 └── requirements.txt        # Dependências Python
 ```
 
-## 🚀 Como Executar
-
-### 1. Clonar e configurar ambiente
-
-```bash
-git clone https://github.com/marc-vinn/dashly.git
-cd dashly/Dashboard
-python -m venv .venv
-.venv\Scripts\activate       # Windows
-pip install -r requirements.txt
-```
-
-### 2. Configurar variáveis de ambiente
-
-```bash
-# Copie o template e preencha com sua chave
-copy ..\..env.example ..\.env
-```
-
-Edite o `.env` na raiz do projeto:
-```
-OPENROUTER_API_KEY=sua_chave_openrouter_aqui
-```
-
-> **Nota:** A chave da OpenRouter é necessária apenas para o AI Assistant na aba "Análises". O dashboard funciona normalmente sem ela.
-
-### 3. Executar
-
-```bash
-python app.py
-```
-
-Acesse: [http://localhost:8050](http://localhost:8050)
-
-## 🧪 Testes
-
-```bash
-cd Dashboard
-python -m pytest tests/ -v
-```
-
-## 🛡️ Segurança
-
-- Chaves de API via variáveis de ambiente (nunca em código)
-- `.gitignore` protege `.env`, dados de usuário (`*.csv`, `*.xlsx`) e cache
-- Cache de sessão com TTL de 24h via `diskcache`
-- Validação de uploads com Defense in Depth (extensão + encoding + estrutura)
-- Guardrails de escopo no prompt da IA
 
 ## 🛠️ Stack
 
