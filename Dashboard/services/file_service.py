@@ -31,6 +31,13 @@ class FileService:
             if df.empty:
                 return None, "O arquivo enviado está vazio."
                 
+            # Normalizar colunas de texto/respostas dos usuários (ignorar case e aplicar Capitalize por padrão)
+            for col in df.columns:
+                if pd.api.types.is_object_dtype(df[col]):
+                    df[col] = df[col].apply(
+                        lambda x: str(x).strip().capitalize() if pd.notna(x) else x
+                    )
+                
             return df, None
             
         except UnicodeDecodeError:

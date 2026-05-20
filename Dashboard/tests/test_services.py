@@ -31,3 +31,21 @@ def test_parse_uploaded_file_corrupted_csv():
     
     assert df is None
     assert erro is not None
+
+
+def test_parse_uploaded_file_case_normalization():
+    # Cria um CSV com variações de case nas respostas
+    csv_content = "pergunta\nASSIM\nAssim\nASsIm\nnão\nNÃO\nSim\nSIM"
+    encoded = base64.b64encode(csv_content.encode('utf-8')).decode('utf-8')
+    contents = f"data:text/csv;base64,{encoded}"
+    
+    df, erro = FileService.parse_uploaded_file(contents, "respostas.csv")
+    
+    assert erro is None
+    assert isinstance(df, pd.DataFrame)
+    
+    # Verifica se os valores foram unificados e capitalizados
+    valores_unicos = df['pergunta'].dropna().unique()
+    assert len(valores_unicos) == 3
+    assert set(valores_unicos) == {"Assim", "Não", "Sim"}
+
