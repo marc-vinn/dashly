@@ -1,3 +1,13 @@
+import sys
+import os
+
+# Garantir que o diretório do app está no Python path (necessário para Vercel)
+# Quando a Vercel importa "Dashboard/app.py", o CWD pode ser a raiz do repo,
+# não o diretório Dashboard/, quebrando imports como "from logic.callbacks import..."
+APP_DIR = os.path.dirname(os.path.abspath(__file__))
+if APP_DIR not in sys.path:
+    sys.path.insert(0, APP_DIR)
+
 import dash
 import dash_bootstrap_components as dbc
 from dash import dcc, html
@@ -5,6 +15,7 @@ from logic.callbacks import register_callbacks
 
 app = dash.Dash(
     __name__,
+    assets_folder=os.path.join(APP_DIR, "assets"),
     external_stylesheets=[
         dbc.themes.BOOTSTRAP,
         "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css",
