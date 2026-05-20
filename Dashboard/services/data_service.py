@@ -1,5 +1,3 @@
-import uuid
-import time
 import os
 import pandas as pd
 
@@ -10,57 +8,54 @@ if not IS_VERCEL:
     # Ambiente local: manter diskcache para persistência robusta
     try:
         import diskcache
+        import uuid
         CACHE_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "cache_data")
         _disk_cache = diskcache.Cache(CACHE_DIR)
     except ImportError:
-        # Fallback se diskcache não estiver instalado
-        IS_VERCEL = True  # Força uso do cache in-memory
-
-# Cache in-memory para ambiente serverless (Vercel)
-_memory_cache = {}
+        IS_VERCEL = True  # Fallback para modo serverless
 
 
 class DataService:
     @staticmethod
     def store_data(df: pd.DataFrame) -> str:
         """
-        Armazena o DataFrame e retorna um ID único.
-        Local: usa diskcache (disco). Vercel: usa dicionário in-memory (ephemeral).
+        Armazena o DataFrame e retorna um identificador.
+        Local: usa diskcache (retorna UUID).
+        Vercel: serializa o DataFrame inteiro como JSON (vive no browser via dcc.Store).
         """
-        cache_id = str(uuid.uuid4())
-
         if IS_VERCEL:
-            # Limpeza preventiva de entries antigas (>1h) para não explodir memória da função
-            cutoff = time.time() - 3600
-            expired = [k for k, v in _memory_cache.items() if v["ts"] < cutoff]
-            for k in expired:
-                del _memory_cache[k]
-            _memory_cache[cache_id] = {"data": df, "ts": time.time()}
+            # No serverless, devolvemos o JSON direto — vive no sessionStorage do browser
+            return df.to_json(orient="split", date_format="iso")
         else:
-            _disk_cache.set(cache_id, df, expire=86400)  # Expira em 24h
-
-        return cache_id
+            cache_id = str(uuid.uuid4())
+            _disk_cache.set(cache_id, df, expire=86400)
+            return cache_id
 
     @staticmethod
-    def get_data(cache_id: str) -> pd.DataFrame:
+    def get_data(store_value: str) -> pd.DataFrame:
         """
-        Recupera o DataFrame usando o ID.
+        Recupera o DataFrame.
+        Local: busca no diskcache pelo UUID.
+        Vercel: desserializa o JSON que veio do browser.
         """
-        if not cache_id:
+        if not store_value:
             return None
 
         if IS_VERCEL:
-            entry = _memory_cache.get(cache_id)
-            return entry["data"] if entry else None
+            try:
+                import io
+                return pd.read_json(io.StringIO(store_value), orient="split")
+            except (ValueError, TypeError):
+                return None
         else:
-            return _disk_cache.get(cache_id)
+            return _disk_cache.get(store_value)
 
     @staticmethod
-    def get_filters_options(cache_id: str, pergunta_selecionada: str):
+    def get_filters_options(store_value: str, pergunta_selecionada: str):
         """
         Retorna as opções para os dropdowns de filtro, isolando a lógica do pandas.
         """
-        df = DataService.get_data(cache_id)
+        df = DataService.get_data(store_value)
         if df is None:
             return [], []
 
