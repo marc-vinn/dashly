@@ -2,9 +2,7 @@ dash
 dash-bootstrap-components
 pandas
 diskcache
-pyarrow
 openpyxl
 xlrd
-mlxtend
 requests
 gunicorn

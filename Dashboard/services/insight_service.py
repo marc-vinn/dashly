@@ -1,8 +1,8 @@
 import pandas as pd
-from mlxtend.frequent_patterns import apriori, association_rules
+from services.apriori_light import apriori_light, generate_association_rules
 import warnings
 
-# Silenciar os avisos de divisão por zero do mlxtend
+# Silenciar os avisos de divisão por zero
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 class InsightService:
@@ -34,13 +34,13 @@ class InsightService:
             df_encoded = df_encoded.astype(bool)
             
             # Encontrar padrões que ocorrem em pelo menos 10% da base (suporte)
-            frequent_itemsets = apriori(df_encoded, min_support=0.1, use_colnames=True)
+            frequent_itemsets = apriori_light(df_encoded, min_support=0.1)
             
             if frequent_itemsets.empty:
                 return [{"title": "Sem Padrões Obvios", "description": "Nenhum padrão ocorreu em mais de 10% da base."}]
                 
             # Gerar regras com Confiança mínima de 50%
-            rules = association_rules(frequent_itemsets, metric="confidence", min_threshold=0.5)
+            rules = generate_association_rules(frequent_itemsets, metric="confidence", min_threshold=0.5)
             
             if rules.empty:
                 return [{"title": "Baixa Confiança", "description": "As associações encontradas são muito fracas estatisticamente."}]
