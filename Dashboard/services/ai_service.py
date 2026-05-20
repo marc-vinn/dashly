@@ -78,7 +78,7 @@ REGRAS DE FORMATAÇÃO E OTIMIZAÇÃO (ANTI-EXCESS):
         headers = {
             "Authorization": f"Bearer {OPENROUTER_API_KEY}",
             "Content-Type": "application/json",
-            "HTTP-Referer": "http://localhost:8050", # Referer obrigatório no OpenRouter
+            "HTTP-Referer": os.environ.get("VERCEL_URL", "http://localhost:8050"), # Referer dinâmico
             "X-Title": "Dashly Local Analises"
         }
         
@@ -89,7 +89,7 @@ REGRAS DE FORMATAÇÃO E OTIMIZAÇÃO (ANTI-EXCESS):
                 {"role": "user", "content": user_question}
             ],
             "temperature": 0.3, # Baixa temperatura para fatos precisos
-            "max_tokens": 500
+            "max_tokens": 300  # Otimizado para serverless (menor latência)
         }
 
         try:
@@ -97,7 +97,7 @@ REGRAS DE FORMATAÇÃO E OTIMIZAÇÃO (ANTI-EXCESS):
                 "https://openrouter.ai/api/v1/chat/completions",
                 headers=headers,
                 json=payload,
-                timeout=20
+                timeout=15  # Reduzido para caber no timeout serverless da Vercel
             )
             response.raise_for_status()
             data = response.json()

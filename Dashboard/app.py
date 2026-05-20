@@ -19,6 +19,9 @@ app = dash.Dash(
     suppress_callback_exceptions=True
 )
 
+# Expor o servidor WSGI (Flask) para Vercel/Gunicorn
+server = app.server
+
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
     dcc.Store(id='store-data', storage_type='session'),
@@ -56,4 +59,9 @@ app.index_string = '''
 register_callbacks()
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # Modo desenvolvimento local — o Dash roda seu servidor interno
+    server.run(debug=True)
+
+# Em produção (Vercel/Gunicorn), a variável "app" precisa ser o WSGI callable (Flask)
+# A Vercel importa este módulo e procura por "app" como ponto de entrada
+app = server
