@@ -33,7 +33,10 @@ class FileService:
                 
             # Normalizar colunas de texto/respostas dos usuários (ignorar case e aplicar Capitalize por padrão)
             for col in df.columns:
-                if pd.api.types.is_object_dtype(df[col]):
+                # Abordagem ultra robusta: normaliza se for detectada como object/string ou contiver qualquer valor string
+                if (pd.api.types.is_object_dtype(df[col]) or 
+                    pd.api.types.is_string_dtype(df[col]) or 
+                    (not df[col].dropna().empty and any(isinstance(v, str) for v in df[col].dropna()))):
                     df[col] = df[col].apply(
                         lambda x: str(x).strip().capitalize() if pd.notna(x) else x
                     )
