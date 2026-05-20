@@ -1,9 +1,11 @@
 import json
 import os
+import time
 import requests
 import pandas as pd
 
 OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
+OPENROUTER_MODEL = os.environ.get("OPENROUTER_MODEL", "deepseek/deepseek-v4-flash:free")
 
 class AIService:
     @staticmethod
@@ -50,7 +52,7 @@ class AIService:
     @staticmethod
     def get_ai_insights(df_summary: str, user_question: str) -> str:
         """
-        Envia a pergunta do usuário para o DeepSeek V4 Flash via OpenRouter.
+        Envia a pergunta do usuário para o modelo configurado via OpenRouter.
         Aplica os guardrails restritos exigidos no documento Adds.md.
         """
         if not OPENROUTER_API_KEY:
@@ -83,7 +85,7 @@ REGRAS DE FORMATAÇÃO E OTIMIZAÇÃO (ANTI-EXCESS):
         }
         
         payload = {
-            "model": "deepseek/deepseek-v4-flash:free", # ID correto do modelo na OpenRouter
+            "model": OPENROUTER_MODEL, # Modelo configurado via variável de ambiente (fallback para deepseek-v4-flash:free)
             "messages": [
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_question}
@@ -92,15 +94,44 @@ REGRAS DE FORMATAÇÃO E OTIMIZAÇÃO (ANTI-EXCESS):
             "max_tokens": 300  # Otimizado para serverless (menor latência)
         }
 
-        try:
-            response = requests.post(
-                "https://openrouter.ai/api/v1/chat/completions",
-                headers=headers,
-                json=payload,
-                timeout=15  # Reduzido para caber no timeout serverless da Vercel
-            )
-            response.raise_for_status()
-            data = response.json()
-            return data["choices"][0]["message"]["content"]
-        except Exception as e:
-            return f"Erro de comunicação com a IA: {str(e)}"
+        max_retries = 3
+        backoff_factor = 2.0
+        current_delay = 1.5
+
+        for attempt in range(max_retries):
+            try:
+                response = requests.post(
+                    "https://openrouter.ai/api/v1/chat/completions",
+                    headers=headers,
+                    json=payload,
+                    timeout=15  # Reduzido para caber no timeout serverless da Vercel
+                )
+                
+                # Se for erro 429 (Too Many Requests), aplica backoff e tenta novamente
+                if response.status_code == 429:
+                    if attempt < max_retries - 1:
+                        print(f"[AIService] Erro 429 atingido. Retentando em {current_delay}s (Tentativa {attempt + 1}/{max_retries})...")
+                        time.sleep(current_delay)
+                        current_delay *= backoff_factor
+                        continue
+
+                response.raise_for_status()
+                data = response.json()
+                return data["choices"][0]["message"]["content"]
+                
+            except requests.exceptions.HTTPError as e:
+                # Trata erros HTTP, incluindo 429 caso as retentativas tenham esgotado
+                if response.status_code == 429 and attempt < max_retries - 1:
+                    print(f"[AIService] Erro HTTP 429 atingido no request. Retentando em {current_delay}s...")
+                    time.sleep(current_delay)
+                    current_delay *= backoff_factor
+                    continue
+                
+                if response.status_code == 429:
+                    return "⚠️ O servidor de IA está extremamente congestionado no momento (Erro 429: Limite de requisições excedido). Por favor, tente novamente em alguns instantes."
+                
+                return f"Erro de comunicação com a IA (Erro HTTP {response.status_code}): {str(e)}"
+                
+            except Exception as e:
+                return f"Erro de comunicação com a IA: {str(e)}"
+

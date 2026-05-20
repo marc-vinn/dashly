@@ -51,10 +51,10 @@ class TestRoteadorLayout:
         assert 'redirect-after-upload' not in layout_str
 
     def test_rota_analises_retorna_layout(self):
-        from pages.dashboard import layout_analises
+        from pages.analises import layout_analises
         layout = layout_analises()
         assert layout is not None
-        assert 'output-data-upload' in str(layout)
+        assert 'quick-insights-container' in str(layout)
 
     def test_rota_dados_retorna_layout(self):
         from pages.dashboard import layout_dados
