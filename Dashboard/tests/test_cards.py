@@ -82,3 +82,20 @@ class TestCriarBlocoPergunta:
         bloco = criar_bloco_pergunta(df, "Nota", info, 8, "histograma")
         bloco_str = str(bloco)
         assert "732dd3" in bloco_str
+
+    def test_natural_sorting_in_blocks(self):
+        """Os blocos de pergunta devem ordenar as categorias de forma crescente pelos valores."""
+        from components.cards import criar_bloco_pergunta
+        # 3 se repete 6 vezes, mas deve ser posicionado de forma crescente: 1, 2, 3, 4, 5
+        df = pd.DataFrame({"Nota": ["3", "5", "3", "4", "2", "3", "1", "3", "3", "3"]})
+        info = self._info_basica(df, "Nota")
+        bloco = criar_bloco_pergunta(df, "Nota", info, 8, "barra")
+        
+        # O gráfico fica em: Col -> Card -> CardBody -> [Div, Graph]
+        graph = bloco.children[0].children[1].children[1]
+        fig = graph.figure
+        
+        # O eixo x deve estar ordenado crescentemente: 1, 2, 3, 4, 5
+        categorias = list(fig.data[0].x)
+        assert categorias == ["1", "2", "3", "4", "5"]
+

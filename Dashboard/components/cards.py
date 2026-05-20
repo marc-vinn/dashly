@@ -23,10 +23,26 @@ def _paleta_pizza(n):
     return paleta
 
 
+import re
+
+def _chave_ordenacao_natural(val):
+    s = str(val).strip()
+    s_limpa = s.replace('.', '').replace(',', '')
+    numeros = re.findall(r'\d+', s_limpa)
+    if numeros:
+        return (float(numeros[0]), s.lower())
+    else:
+        return (float('inf'), s.lower())
+
+
 def criar_bloco_pergunta(df, coluna, info, largura, tipo_grafico):
     # 1. PREPARAÇÃO DE DADOS
     counts = df[coluna].value_counts().reset_index()
     counts.columns = [coluna, 'Quantidade']
+
+    # Ordenar em ordem crescente pelos valores usando a chave de ordenação natural
+    counts['sort_key'] = counts[coluna].apply(_chave_ordenacao_natural)
+    counts = counts.sort_values(by='sort_key').drop(columns=['sort_key'])
 
     esquema_largo = ['histograma', 'barras', 'barra']
     largura_final = 8 if tipo_grafico in esquema_largo else largura
