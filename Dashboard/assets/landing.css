@@ -56,6 +56,16 @@ body {
     font-weight: 800;
 }
 
+.landing-subtitle {
+    font-size: 1.25rem;
+    color: #717680;
+    margin-top: -1rem;
+    margin-bottom: 2.5rem;
+    font-weight: 400;
+    letter-spacing: -0.3px;
+}
+
+
 /* Glass Button Container */
 .glass-button {
   --bg-color: rgba(255, 255, 255, 0.25);

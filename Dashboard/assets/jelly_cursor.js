@@ -1,12 +1,16 @@
-document.addEventListener("DOMContentLoaded", function() {
+function setupFluid() {
     let canvas = null;
     let isActive = false;
 
     function initializeFluid() {
-        if (!window.fluid || !canvas) return;
+        if (!window.WebGLFluid || !canvas) return;
         
         try {
-            window.fluid(canvas, {
+            // Define o tamanho inicial do buffer de desenho
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            window.WebGLFluid(canvas, {
                 IMMEDIATE: true,
                 TRIGGER: 'hover',
                 SIM_RESOLUTION: 256,
@@ -26,7 +30,7 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-    const observer = new MutationObserver(function(mutations) {
+    function checkAndRun() {
         const foundCanvas = document.getElementById('particleCanvas');
         
         // Se a landing page está ativa
@@ -43,11 +47,11 @@ document.addEventListener("DOMContentLoaded", function() {
             }
 
             // 2. Carregar a biblioteca de simulação de fluidos se não carregada
-            if (!window.fluid) {
+            if (!window.WebGLFluid) {
                 if (!document.getElementById('webgl-fluid-script')) {
                     const script = document.createElement("script");
                     script.id = "webgl-fluid-script";
-                    script.src = "https://cdn.jsdelivr.net/npm/webgl-fluid-simulation/dist/fluid.min.js";
+                    script.src = "https://cdn.jsdelivr.net/npm/webgl-fluid@0.4.0/dist/webgl-fluid.umd.min.js";
                     script.onload = function() {
                         initializeFluid();
                     };
@@ -67,7 +71,19 @@ document.addEventListener("DOMContentLoaded", function() {
             }
             canvas = null;
         }
-    });
+    }
 
+    // Usar MutationObserver para páginas carregadas dinamicamente
+    const observer = new MutationObserver(checkAndRun);
     observer.observe(document.body, { childList: true, subtree: true });
-});
+
+    // Executar imediatamente se já estiver na página
+    checkAndRun();
+}
+
+// Inicializador robusto que suporta carregamento assíncrono do Dash
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", setupFluid);
+} else {
+    setupFluid();
+}
