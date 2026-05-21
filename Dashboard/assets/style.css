@@ -370,3 +370,116 @@ body {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-10px); }
 }
+
+/* ────────────────────────────────────────────────
+   9. CUSTOM STYLES FOR FILTERS & SEGMENTATION (Liquid Glass & Roxo)
+   ──────────────────────────────────────────────── */
+.filter-col-divider {
+    border-right: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+@media(max-width: 991.98px) {
+    .filter-col-divider {
+        border-right: none;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        padding-bottom: 1rem;
+        margin-bottom: 1rem;
+    }
+}
+
+/* Base custom dropdown control override */
+.custom-dropdown .Select-control {
+    background-color: rgba(255, 255, 255, 0.4) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.6) !important;
+    border-radius: 20px !important;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02) !important;
+    padding: 2px 8px !important;
+}
+
+.custom-dropdown .Select-control:hover {
+    border-color: rgba(152, 88, 241, 0.4) !important;
+    background-color: rgba(255, 255, 255, 0.65) !important;
+    box-shadow: 0 4px 15px rgba(152, 88, 241, 0.1) !important;
+}
+
+.custom-dropdown.is-focused:not(.is-open) > .Select-control,
+.custom-dropdown.is-focused .Select-control {
+    border-color: #9858f1 !important;
+    background-color: rgba(255, 255, 255, 0.8) !important;
+    box-shadow: 0 0 0 3px rgba(152, 88, 241, 0.2) !important;
+}
+
+/* Dropdown Menu / Opções flutuantes */
+.custom-dropdown .Select-menu-outer {
+    background-color: rgba(255, 255, 255, 0.92) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.8) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08) !important;
+    overflow: hidden !important;
+    margin-top: 6px !important;
+    padding: 4px !important;
+    z-index: 1000 !important;
+}
+
+/* Opções individuais */
+.custom-dropdown .Select-option {
+    border-radius: 10px !important;
+    margin-bottom: 2px !important;
+    transition: all 0.15s ease !important;
+    color: #1A1D21 !important;
+    padding: 8px 12px !important;
+}
+
+.custom-dropdown .Select-option.is-focused {
+    background-color: rgba(152, 88, 241, 0.08) !important;
+    color: #732dd3 !important;
+}
+
+.custom-dropdown .Select-option.is-selected {
+    background-color: #9858f1 !important;
+    color: #ffffff !important;
+}
+
+/* Pílulas de Multi-seleção */
+.custom-dropdown .Select-value {
+    background-color: rgba(152, 88, 241, 0.08) !important;
+    border: 1px solid rgba(152, 88, 241, 0.15) !important;
+    border-radius: 12px !important;
+    color: #732dd3 !important;
+    padding: 2px 8px !important;
+    margin: 2px !important;
+}
+
+.custom-dropdown .Select-value-icon {
+    border-right: 1px solid rgba(152, 88, 241, 0.15) !important;
+    color: #732dd3 !important;
+    transition: background 0.15s ease !important;
+}
+
+.custom-dropdown .Select-value-icon:hover {
+    background-color: rgba(152, 88, 241, 0.15) !important;
+    color: #732dd3 !important;
+}
+
+/* Estilo para placeholder e textos */
+.custom-dropdown .Select-placeholder {
+    color: #717680 !important;
+    font-size: 13.5px !important;
+}
+
+.custom-dropdown .Select-input > input {
+    color: #1A1D21 !important;
+}
+
+.custom-dropdown .Select-arrow {
+    border-color: #717680 transparent transparent !important;
+}
+
+.custom-dropdown.is-open .Select-arrow {
+    border-color: transparent transparent #717680 !important;
+}

@@ -67,17 +67,38 @@ def register_callbacks():
         cache_id = DataService.store_data(df)
         return cache_id, dbc.Alert("✓ Planilha carregada com sucesso!", color="success", dismissable=True, duration=3000)
 
-    # ─── CALLBACK 3: FILTROS (apenas pergunta) ─────────────────────────────────
+    # ─── CALLBACK 3: FILTROS (exibição e segmentação) ──────────────────────────
     @callback(
         Output('filtro-pergunta', 'options'),
+        Output('filtro-segmento-pergunta', 'options'),
         Input('store-data', 'data'),
     )
     def atualizar_filtros(cache_id):
         if not cache_id:
-            return []
+            return [], []
 
         opcoes, _ = DataService.get_filters_options(cache_id, None)
-        return opcoes
+        return opcoes, opcoes
+
+    # ─── CALLBACK 3B: RESPOSTAS DE SEGMENTAÇÃO DINÂMICAS ──────────────────────
+    @callback(
+        Output('filtro-segmento-resposta', 'options'),
+        Output('filtro-segmento-resposta', 'disabled'),
+        Output('filtro-segmento-resposta', 'value'),
+        Input('store-data', 'data'),
+        Input('filtro-segmento-pergunta', 'value'),
+        State('filtro-segmento-resposta', 'value')
+    )
+    def atualizar_opcoes_resposta(cache_id, pergunta_selecionada, valor_atual):
+        if not cache_id or not pergunta_selecionada:
+            return [], True, None
+
+        _, opcoes_valor = DataService.get_filters_options(cache_id, pergunta_selecionada)
+        
+        # Mantém o valor se ele existir nas novas opções, caso contrário reseta para None
+        novo_valor = valor_atual if valor_atual in [opt['value'] for opt in opcoes_valor] else None
+        
+        return opcoes_valor, False, novo_valor
 
     # ─── CALLBACK 4: GRID DINÂMICO ──────────────────────────────────────────────
     @callback(
@@ -85,8 +106,10 @@ def register_callbacks():
         Output('kpi-header', 'children'),
         Input('store-data', 'data'),
         Input('filtro-pergunta', 'value'),
+        Input('filtro-segmento-pergunta', 'value'),
+        Input('filtro-segmento-resposta', 'value'),
     )
-    def renderizar_relatorio_final(cache_id, col_filtro):
+    def renderizar_relatorio_final(cache_id, col_filtro, segmento_pergunta, segmento_resposta):
         if not cache_id:
             return html.Div("Aguardando upload...", className="p-4 text-muted"), []
 
@@ -94,28 +117,53 @@ def register_callbacks():
         if df is None:
             return html.Div("Sessão expirada. Faça upload novamente.", className="p-4 text-warning"), []
 
-        total_respostas = len(df)
-        kpis = [criar_card_kpi("Total de Respostas", f"{total_respostas}", "fa-solid fa-users", "text-primary")]
+        total_original = len(df)
 
-        colunas_analise = [c for c in df.columns if "carimbo" not in c.casefold() and "timestamp" not in c.casefold()]
+        # Aplicar filtro de segmentação (Cohort), se ativo
+        if segmento_pergunta and segmento_resposta is not None:
+            df_filtrado = df[df[segmento_pergunta] == segmento_resposta]
+            total_filtrado = len(df_filtrado)
+        else:
+            df_filtrado = df
+            total_filtrado = total_original
 
-        # Se filtro ativo, renderiza apenas o bloco daquela pergunta
-        if col_filtro and col_filtro in colunas_analise:
-            colunas_analise = [col_filtro]
+        # Criar KPI proporcional
+        if segmento_pergunta and segmento_resposta is not None:
+            porcentagem = (total_filtrado / total_original) * 100 if total_original > 0 else 0
+            kpis = [criar_card_kpi("Respostas Segmentadas", f"{total_filtrado} de {total_original} ({porcentagem:.1f}%)", "fa-solid fa-users", "text-primary")]
+        else:
+            kpis = [criar_card_kpi("Total de Respostas", f"{total_original}", "fa-solid fa-users", "text-primary")]
+
+        # Se a segmentação resultou em 0 registros, exibir um aviso amigável
+        if total_filtrado == 0:
+            return dbc.Alert(
+                "Nenhum participante atende aos critérios de segmentação selecionados.",
+                color="warning",
+                className="text-center p-4 fs-5 w-100 mt-3"
+            ), kpis
+
+        colunas_analise = [c for c in df_filtrado.columns if "carimbo" not in c.casefold() and "timestamp" not in c.casefold()]
+
+        # Se filtro de exibição ativo, renderizar apenas gráficos selecionados
+        if col_filtro:
+            # Garante que seja tratado como lista caso venha string (fallback)
+            if isinstance(col_filtro, str):
+                col_filtro = [col_filtro]
+            colunas_analise = [c for c in colunas_analise if c in col_filtro]
 
         blocos = []
         for col in colunas_analise:
-            info = processar_estatisticas(df, col)
+            info = processar_estatisticas(df_filtrado, col)
             if info.get('tipo') == 'numerico':
                 tipo = 'histograma'
                 largura = 8
-            elif df[col].nunique() <= 3:
+            elif df_filtrado[col].nunique() <= 3:
                 tipo = 'pizza'
                 largura = 4
             else:
                 tipo = 'barra'
                 largura = 8
-            blocos.append(criar_bloco_pergunta(df, col, info, largura, tipo))
+            blocos.append(criar_bloco_pergunta(df_filtrado, col, info, largura, tipo))
 
         return blocos, kpis
 

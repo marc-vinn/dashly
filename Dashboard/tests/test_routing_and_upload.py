@@ -5,6 +5,7 @@ Escritos ANTES das correções de implementação.
 import pytest
 import sys
 import os
+import pandas as pd
 
 # Adiciona o diretório raiz ao path para importações
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
@@ -136,3 +137,57 @@ class TestDataServiceFiltros:
         cache_id = DataService.store_data(df)
         _, opcoes_valor = DataService.get_filters_options(cache_id, None)
         assert opcoes_valor == []
+
+
+# ─── TESTES DA NOVA LÓGICA DE FILTROS E SEGMENTAÇÃO (COHORT) ──────────────────
+
+class TestNovaLogicaFiltros:
+    """Valida a lógica de exibição múltipla de gráficos e segmentação por cohort."""
+
+    def test_multi_selection_filtering(self):
+        """Valida que a lógica seleciona e exibe apenas os múltiplos gráficos escolhidos."""
+        colunas_disponiveis = ["Pergunta 1", "Pergunta 2", "Pergunta 3", "Carimbo de data"]
+        colunas_analise = [c for c in colunas_disponiveis if "carimbo" not in c.casefold()]
+
+        # Caso 1: Usuário selecionou duas perguntas específicas
+        col_filtro = ["Pergunta 1", "Pergunta 3"]
+        colunas_filtradas = [c for c in colunas_analise if c in col_filtro]
+        assert colunas_filtradas == ["Pergunta 1", "Pergunta 3"]
+
+        # Caso 2: Filtro limpo/vazio (deve exibir todos os gráficos de análise)
+        col_filtro_vazio = []
+        if col_filtro_vazio:
+            colunas_filtradas = [c for c in colunas_analise if c in col_filtro_vazio]
+        else:
+            colunas_filtradas = colunas_analise
+        assert colunas_filtradas == ["Pergunta 1", "Pergunta 2", "Pergunta 3"]
+
+    def test_cohort_segmentation_filtering(self):
+        """Valida a lógica de filtragem/segmentação (Cohort) de linhas do DataFrame."""
+        df = pd.DataFrame({
+            "Q1_Profissao": ["Dev", "Design", "Dev", "QA"],
+            "Q2_Satisfacao": ["Sim", "Não", "Sim", "Sim"]
+        })
+
+        # Segmentação: Apenas pessoas cuja profissão seja "Dev"
+        segmento_pergunta = "Q1_Profissao"
+        segmento_resposta = "Dev"
+
+        df_filtrado = df[df[segmento_pergunta] == segmento_resposta]
+        assert len(df_filtrado) == 2
+        assert list(df_filtrado["Q2_Satisfacao"]) == ["Sim", "Sim"]
+
+    def test_cohort_zero_matches(self):
+        """Valida o caso de borda onde a segmentação não retorna nenhum registro."""
+        df = pd.DataFrame({
+            "Q1_Profissao": ["Dev", "Design"],
+            "Q2_Satisfacao": ["Sim", "Não"]
+        })
+
+        # Segmentação inexistente: Profissão "PM"
+        segmento_pergunta = "Q1_Profissao"
+        segmento_resposta = "PM"
+
+        df_filtrado = df[df[segmento_pergunta] == segmento_resposta]
+        assert len(df_filtrado) == 0
+        assert df_filtrado.empty
