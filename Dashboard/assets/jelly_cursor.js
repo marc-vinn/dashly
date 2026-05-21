@@ -67,17 +67,18 @@ function setupFluid() {
             canvas.height = window.innerHeight;
 
             window.WebGLFluid(canvas, {
-                IMMEDIATE: true,
-                TRIGGER: 'hover',
-                SIM_RESOLUTION: 256,
-                DYE_RESOLUTION: 1024,
-                DENSITY_DISSIPATION: 0.95,
-                VELOCITY_DISSIPATION: 0.95,
-                PRESSURE_ITERATIONS: 40,
+                IMMEDIATE: false,       // NÃO gerar respingos automáticos aleatórios
+                TRIGGER: 'hover',       // Reagir apenas ao movimento do mouse
+                COLORFUL: false,        // Desativar cores aleatórias
+                SIM_RESOLUTION: 128,
+                DYE_RESOLUTION: 512,
+                DENSITY_DISSIPATION: 0.97,  // Desaparece rápido — fica só ao redor do cursor
+                VELOCITY_DISSIPATION: 0.98,
+                PRESSURE_ITERATIONS: 20,
                 CURL: 30,
-                SPLAT_RADIUS: 0.28,
+                SPLAT_RADIUS: 0.3,     // Tamanho do rastro ao redor do cursor
                 SPLAT_FORCE: 6000,
-                COLOR_PALETTE: ['#ffffff'],
+                COLOR_PALETTE: ['#ffffff'], // Apenas branco (mix-blend-mode inverte para preto)
                 BACK_COLOR: '#000000',
                 TRANSPARENT: true
             });
