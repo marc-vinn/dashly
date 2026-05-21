@@ -20,7 +20,7 @@ def layout_dashboard():
         ], className="mb-2 align-items-center g-3"),
 
         # Grid de Gráficos
-        dbc.Row(id='grid-de-cards', className="g-4 d-flex flex-wrap")
+        dbc.Row(id='grid-de-cards', className="g-4 d-flex flex-wrap justify-content-center")
     ], style={"paddingTop": "1.5rem"})
 
 
