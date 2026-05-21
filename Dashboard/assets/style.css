@@ -387,6 +387,17 @@ body {
     }
 }
 
+/* Base wrapper override to guarantee stacking context */
+.custom-dropdown {
+    position: relative !important;
+    z-index: 10 !important;
+}
+
+.custom-dropdown:focus-within,
+.custom-dropdown.is-open {
+    z-index: 1050 !important;
+}
+
 /* Base custom dropdown control override */
 .custom-dropdown .Select-control {
     background-color: rgba(255, 255, 255, 0.4) !important;

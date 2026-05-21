@@ -57,8 +57,8 @@ def layout_dashboard():
                                 ])
                             ], lg=6, md=12, xs=12, className="ps-lg-4"),
                         ])
-                    ], className="p-4")
-                ], className="glass-card mb-4")
+                    ], className="p-4", style={"overflow": "visible"})
+                ], className="glass-card mb-4", style={"overflow": "visible"})
             ], width=12)
         ]),
 
