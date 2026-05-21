@@ -152,19 +152,3 @@ body {
 .hide-canvas {
     display: none !important;
 }
-
-/* ────────────────────────────────────────────────
-   8. LIQUID WEBGL FLUID SIMULATION
-   ──────────────────────────────────────────────── */
-#fluid-canvas {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    pointer-events: none;
-    z-index: 100;
-    mix-blend-mode: difference;
-    filter: grayscale(100%);        /* Força preto e branco puro, independente das cores da biblioteca */
-}
-
