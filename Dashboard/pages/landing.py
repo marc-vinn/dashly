@@ -13,7 +13,7 @@ def layout_landing():
                 html.Span("Dashly", className="dashly-highlight")
             ], className="landing-h1"),
 
-            html.P("Carregue seu arquivo .Xls, .csv", className="landing-subtitle"),
+            html.P("Clique no botão para carregar seu arquivo!", className="landing-subtitle"),
 
             # Botão de upload integrado com efeito Liquid Glass
             # O redirect é feito via Output('url', 'pathname') no callback — sem Location duplicado
