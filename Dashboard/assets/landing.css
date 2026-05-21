@@ -165,4 +165,6 @@ body {
     pointer-events: none;
     z-index: 100;
     mix-blend-mode: difference;
+    filter: grayscale(100%);        /* Força preto e branco puro, independente das cores da biblioteca */
 }
+
