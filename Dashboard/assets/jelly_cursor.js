@@ -1,137 +1,71 @@
 document.addEventListener("DOMContentLoaded", function() {
-    let container = null;
-    let svgFilter = null;
+    let canvas = null;
     let isActive = false;
-    let animationId = null;
 
-    const mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
-    
-    // Lista de blobs
-    let blobs = [];
-
-    function onMouseMove(e) {
-        mouse.x = e.clientX;
-        mouse.y = e.clientY;
-    }
-
-    function animate() {
-        if (!isActive) return;
-
-        // Atualiza a posição de cada blob
-        for (let i = 0; i < blobs.length; i++) {
-            const blob = blobs[i];
-            const targetX = i === 0 ? mouse.x : blobs[i - 1].x;
-            const targetY = i === 0 ? mouse.y : blobs[i - 1].y;
-
-            // Easing / LERP
-            // i === 0 é o principal, mais rápido. Os outros criam o rastro.
-            const ease = i === 0 ? 0.28 : 0.22 - (i * 0.025);
-            blob.x += (targetX - blob.x) * ease;
-            blob.y += (targetY - blob.y) * ease;
-
-            // Aplica no DOM usando transform para alta performance (Hardware Acceleration)
-            blob.el.style.transform = `translate3d(${blob.x}px, ${blob.y}px, 0) translate(-50%, -50%)`;
-        }
-
-        animationId = requestAnimationFrame(animate);
-    }
-
-    // Handlers para hover em elementos interativos
-    function handleMouseOver(e) {
-        const target = e.target.closest('a, button, [role="button"], input, .glass-button, .upload-box, label, select');
-        if (target && blobs.length > 0) {
-            blobs[0].el.classList.add('jelly-hover');
-        }
-    }
-
-    function handleMouseOut(e) {
-        const target = e.target.closest('a, button, [role="button"], input, .glass-button, .upload-box, label, select');
-        if (target && blobs.length > 0) {
-            blobs[0].el.classList.remove('jelly-hover');
+    function initializeFluid() {
+        if (!window.fluid || !canvas) return;
+        
+        try {
+            window.fluid(canvas, {
+                IMMEDIATE: true,
+                TRIGGER: 'hover',
+                SIM_RESOLUTION: 256,
+                DYE_RESOLUTION: 1024,
+                DENSITY_DISSIPATION: 0.95, // Quão rápido a tinta some (perto de 1 = demora mais)
+                VELOCITY_DISSIPATION: 0.95,
+                PRESSURE_ITERATIONS: 40,
+                CURL: 30, // Quantidade de "redemoinhos" no fluido
+                SPLAT_RADIUS: 0.28, // Tamanho do rastro do cursor (ideal para inverter texto de forma legível)
+                SPLAT_FORCE: 6000, // Força com que a tinta é arrastada
+                COLOR_PALETTE: ['#ffffff'], // Apenas branco para funcionar com o mix-blend-mode
+                BACK_COLOR: '#000000', // O fundo do canvas preto fica invisível sob mix-blend-mode
+                TRANSPARENT: true
+            });
+        } catch (e) {
+            console.error("Erro ao inicializar o WebGL Fluid Simulation:", e);
         }
     }
 
     const observer = new MutationObserver(function(mutations) {
         const foundCanvas = document.getElementById('particleCanvas');
         
-        // Se a landing page está ativa (detectada pela presença do canvas de partículas)
+        // Se a landing page está ativa
         if (foundCanvas && !isActive) {
             isActive = true;
             
-            // 1. Criar filtro SVG se não existir
-            if (!document.getElementById('jelly-svg-filter')) {
-                svgFilter = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-                svgFilter.setAttribute("id", "jelly-svg-filter");
-                svgFilter.style.display = "none";
-                svgFilter.style.position = "absolute";
-                svgFilter.innerHTML = `
-                    <defs>
-                        <filter id="goo">
-                            <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
-                            <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9" result="goo" />
-                            <feComposite in="SourceGraphic" in2="goo" operator="atop" />
-                        </filter>
-                    </defs>
-                `;
-                document.body.appendChild(svgFilter);
+            // 1. Criar o canvas para o fluido WebGL
+            if (!document.getElementById('fluid-canvas')) {
+                canvas = document.createElement("canvas");
+                canvas.setAttribute("id", "fluid-canvas");
+                document.body.appendChild(canvas);
+            } else {
+                canvas = document.getElementById('fluid-canvas');
             }
 
-            // 2. Criar container do cursor se não existir
-            if (!document.getElementById('jelly-cursor-container')) {
-                container = document.createElement("div");
-                container.setAttribute("id", "jelly-cursor-container");
-                container.className = "jelly-container";
-                
-                // Criar 6 blobs para um rastro fluido e espesso
-                const numBlobs = 6;
-                blobs = [];
-                for (let i = 0; i < numBlobs; i++) {
-                    const el = document.createElement("div");
-                    el.className = i === 0 ? "jelly-blob main-blob" : "jelly-blob trail-blob";
-                    
-                    // Adiciona o elemento interno para a animação de escala suave
-                    const inner = document.createElement("div");
-                    inner.className = "jelly-blob-inner";
-                    el.appendChild(inner);
-                    
-                    container.appendChild(el);
-                    
-                    blobs.push({
-                        el: el,
-                        x: mouse.x,
-                        y: mouse.y
-                    });
+            // 2. Carregar a biblioteca de simulação de fluidos se não carregada
+            if (!window.fluid) {
+                if (!document.getElementById('webgl-fluid-script')) {
+                    const script = document.createElement("script");
+                    script.id = "webgl-fluid-script";
+                    script.src = "https://cdn.jsdelivr.net/npm/webgl-fluid-simulation/dist/fluid.min.js";
+                    script.onload = function() {
+                        initializeFluid();
+                    };
+                    document.head.appendChild(script);
                 }
-                
-                document.body.appendChild(container);
+            } else {
+                initializeFluid();
             }
-            
-            window.addEventListener('mousemove', onMouseMove);
-            window.addEventListener('mouseover', handleMouseOver);
-            window.addEventListener('mouseout', handleMouseOut);
-            animate();
             
         } else if (!foundCanvas && isActive) {
-            // Landing page inativa, limpar elementos e listeners
+            // Landing page inativa, limpar o canvas de fluido
             isActive = false;
-            if (animationId) cancelAnimationFrame(animationId);
-            window.removeEventListener('mousemove', onMouseMove);
-            window.removeEventListener('mouseover', handleMouseOver);
-            window.removeEventListener('mouseout', handleMouseOut);
             
-            const existingContainer = document.getElementById('jelly-cursor-container');
-            if (existingContainer && existingContainer.parentNode) {
-                existingContainer.parentNode.removeChild(existingContainer);
+            const existingCanvas = document.getElementById('fluid-canvas');
+            if (existingCanvas && existingCanvas.parentNode) {
+                existingCanvas.parentNode.removeChild(existingCanvas);
             }
-            
-            const existingFilter = document.getElementById('jelly-svg-filter');
-            if (existingFilter && existingFilter.parentNode) {
-                existingFilter.parentNode.removeChild(existingFilter);
-            }
-            
-            container = null;
-            svgFilter = null;
-            blobs = [];
+            canvas = null;
         }
     });
 

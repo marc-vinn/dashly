@@ -144,63 +144,15 @@ body {
 }
 
 /* ────────────────────────────────────────────────
-   8. LIQUID JELLY CURSOR
+   8. LIQUID WEBGL FLUID SIMULATION
    ──────────────────────────────────────────────── */
-.landing-body,
-.landing-body * {
-    cursor: none !important;
-}
-
-/* Container do cursor de geleia */
-.jelly-container {
+#fluid-canvas {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
     pointer-events: none;
-    z-index: 99999;
+    z-index: 100;
     mix-blend-mode: difference;
-    filter: url(#goo);
 }
-
-/* Os blobs que formam a geleia */
-.jelly-blob {
-    position: absolute;
-    width: 50px;
-    height: 50px;
-    will-change: transform;
-    pointer-events: none;
-}
-
-.jelly-blob-inner {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    background-color: #ffffff; /* O branco com mix-blend-mode: difference inverte as cores por baixo */
-    transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1);
-}
-
-.main-blob {
-    width: 55px;
-    height: 55px;
-}
-
-.main-blob .jelly-blob-inner {
-    background-color: #ffffff;
-}
-
-.trail-blob {
-    width: 42px;
-    height: 42px;
-}
-
-.trail-blob .jelly-blob-inner {
-    opacity: 0.85;
-}
-
-/* Efeito magnético de absorção ao passar sobre elementos interativos */
-.jelly-hover .jelly-blob-inner {
-    transform: scale(1.6);
-}
-
