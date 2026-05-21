@@ -57,13 +57,13 @@ def layout_dashboard():
                                 ])
                             ], lg=6, md=12, xs=12, className="ps-lg-4"),
                         ])
-                    ], className="p-4", style={"overflow": "visible"})
-                ], className="glass-card mb-4", style={"overflow": "visible"})
-            ], width=12)
-        ]),
+                    ], className="p-4", style={"overflow": "visible", "position": "relative", "zIndex": 100})
+                ], className="glass-card mb-4", style={"overflow": "visible", "position": "relative", "zIndex": 100})
+            ], width=12, style={"position": "relative", "zIndex": 100, "overflow": "visible"})
+        ], style={"position": "relative", "zIndex": 100, "overflow": "visible"}),
 
         # Grid de Gráficos
-        dbc.Row(id='grid-de-cards', className="g-4 d-flex flex-wrap justify-content-center")
+        dbc.Row(id='grid-de-cards', className="g-4 d-flex flex-wrap justify-content-center", style={"position": "relative", "zIndex": 1})
     ], style={"paddingTop": "1.5rem"})
 
 

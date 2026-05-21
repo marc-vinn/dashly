@@ -390,11 +390,6 @@ body {
 /* Base wrapper override to guarantee stacking context */
 .custom-dropdown {
     position: relative !important;
-    z-index: 10 !important;
-}
-
-.custom-dropdown:focus-within,
-.custom-dropdown.is-open {
     z-index: 1050 !important;
 }
 
