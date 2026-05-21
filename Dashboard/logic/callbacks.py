@@ -155,45 +155,158 @@ def register_callbacks():
             
         return dbc.Row(cards, className="g-3 mb-5")
 
-    # ─── CALLBACK 5B: AI CHAT ASSISTANT (aba Análises) ───────────────────────────
-    from services.ai_service import AIService
-    
+    # ─── CALLBACK 5A: PREENCHER PROMPTS RÁPIDOS ─────────────────────────────────
+    from dash import ALL, callback_context, dcc
+    import json
+
     @callback(
+        Output('ai-chat-input', 'value', allow_duplicate=True),
+        Input({'type': 'quick-prompt', 'index': ALL}, 'n_clicks'),
+        prevent_initial_call=True
+    )
+    def preencher_prompt_rapido(n_clicks_list):
+        if not any(n_clicks_list):
+            return no_update
+            
+        ctx = callback_context
+        if not ctx.triggered:
+            return no_update
+            
+        triggered = ctx.triggered[0]
+        prop_id_str = triggered['prop_id'].split('.')[0]
+        try:
+            prop_id_dict = json.loads(prop_id_str)
+            index = prop_id_dict['index']
+            prompts = [
+                "Faça um resumo geral dos meus dados e aponte as principais métricas.",
+                "Quais variáveis possuem as maiores correlações ou dependências mútuas?",
+                "Identifique possíveis anomalias, valores atípicos (outliers) ou desvios nos dados.",
+                "Quais insights estratégicos ou recomendações de ação você propõe?"
+            ]
+            return prompts[index]
+        except Exception:
+            return no_update
+
+    # ─── CALLBACK 5B: AI CHAT ASSISTANT (aba Análises com Histórico e Enter Key) ────
+    from services.ai_service import AIService
+
+    def render_chat_history_layout(chat_history):
+        if not chat_history:
+            return html.Div([
+                html.Div(
+                    html.I(className="fa-solid fa-wand-magic-sparkles"),
+                    className="chat-empty-icon"
+                ),
+                html.H3("Assistente de IA Dashly", className="chat-empty-title"),
+                html.P(
+                    "Faça perguntas sobre seus dados, descubra correlações ocultas, "
+                    "identifique anomalias ou solicite análises preditivas completas.",
+                    className="chat-empty-subtitle"
+                ),
+                html.Div([
+                    html.Div([
+                        html.Div("Resumo Geral", className="chat-prompt-title"),
+                        html.Div("Faça um resumo estatístico das variáveis e principais padrões.", className="chat-prompt-desc")
+                    ], className="chat-prompt-card", id={"type": "quick-prompt", "index": 0}, n_clicks=0),
+                    
+                    html.Div([
+                        html.Div("Buscar Correlações", className="chat-prompt-title"),
+                        html.Div("Identifique quais variáveis possuem maior relação mútua.", className="chat-prompt-desc")
+                    ], className="chat-prompt-card", id={"type": "quick-prompt", "index": 1}, n_clicks=0),
+                    
+                    html.Div([
+                        html.Div("Detectar Anomalias", className="chat-prompt-title"),
+                        html.Div("Encontre outliers, valores atípicos ou inconsistências.", className="chat-prompt-desc")
+                    ], className="chat-prompt-card", id={"type": "quick-prompt", "index": 2}, n_clicks=0),
+                    
+                    html.Div([
+                        html.Div("Conselhos Estratégicos", className="chat-prompt-title"),
+                        html.Div("Obtenha insights e recomendações práticas de negócios.", className="chat-prompt-desc")
+                    ], className="chat-prompt-card", id={"type": "quick-prompt", "index": 3}, n_clicks=0),
+                ], className="chat-quick-prompts")
+            ], className="chat-empty-state", id="chat-welcome-state")
+            
+        bubbles = []
+        for i, msg in enumerate(chat_history):
+            role = msg.get("role")
+            text = msg.get("text", "")
+            
+            if role == "user":
+                bubble = html.Div(
+                    text,
+                    className="chat-bubble-user animate__animated animate__fadeInUp",
+                    key=f"msg-user-{i}"
+                )
+                bubbles.append(bubble)
+            elif role == "assistant":
+                bubble = html.Div([
+                    html.Div([
+                        html.I(className="fa-solid fa-robot me-2", style={"color": "#732dd3"}),
+                        html.Span("Dashly AI", style={"fontWeight": "bold", "color": "#732dd3"})
+                    ], className="mb-2 d-flex align-items-center", style={"fontSize": "13px"}),
+                    dcc.Markdown(text, style={"color": "#1A1D21", "lineHeight": "1.6"})
+                ], className="chat-bubble-ai animate__animated animate__fadeInUp", key=f"msg-ai-{i}")
+                bubbles.append(bubble)
+            elif role == "system_error":
+                bubble = dbc.Alert(
+                    text,
+                    color="warning" if "upload" in text.lower() or "expirada" in text.lower() else "danger",
+                    className="mb-3 w-75 align-self-center animate__animated animate__fadeIn"
+                )
+                bubbles.append(bubble)
+                
+        return bubbles
+
+    @callback(
+        Output('store-chat-history', 'data'),
         Output('ai-chat-output', 'children'),
-        Output('ai-chat-input', 'value'), # Limpa o input após enviar
+        Output('ai-chat-input', 'value', allow_duplicate=True),
         Input('ai-chat-btn', 'n_clicks'),
+        Input('ai-chat-input', 'n_submit'),
         State('ai-chat-input', 'value'),
+        State('store-chat-history', 'data'),
         State('store-data', 'data'),
         prevent_initial_call=True
     )
-    def processar_pergunta_ai(n_clicks, pergunta, cache_id):
-        if not n_clicks or not pergunta or not pergunta.strip():
-            return no_update, no_update
+    def processar_pergunta_ai(n_clicks, n_submit, pergunta, chat_history, cache_id):
+        if chat_history is None:
+            chat_history = []
+            
+        ctx = callback_context
+        if not ctx.triggered:
+            return chat_history, render_chat_history_layout(chat_history), no_update
+            
+        # Evita processar se a pergunta estiver em branco
+        if not pergunta or not pergunta.strip():
+            return chat_history, render_chat_history_layout(chat_history), no_update
             
         if not cache_id:
-            return dbc.Alert("Faça upload de um arquivo primeiro.", color="warning"), ""
+            warning_msg = "Faça upload de um arquivo primeiro."
+            chat_history.append({"role": "user", "text": pergunta})
+            chat_history.append({"role": "system_error", "text": warning_msg})
+            return chat_history, render_chat_history_layout(chat_history), ""
             
         df = DataService.get_data(cache_id)
         if df is None:
-            return dbc.Alert("Sessão expirada. Faça upload novamente.", color="warning"), ""
+            warning_msg = "Sessão expirada. Faça upload novamente."
+            chat_history.append({"role": "user", "text": pergunta})
+            chat_history.append({"role": "system_error", "text": warning_msg})
+            return chat_history, render_chat_history_layout(chat_history), ""
             
         try:
             resumo = AIService.get_data_summary(df)
             resposta = AIService.get_ai_insights(resumo, pergunta)
             
-            card_resposta = html.Div([
-                html.H6(html.B(f"Sua Pergunta: {pergunta}"), className="mb-3 text-secondary"),
-                dcc.Markdown(resposta, style={"color": "#1A1D21", "lineHeight": "1.6"})
-            ], className="p-4 mb-3", style={
-                "backgroundColor": "#f8f9fa", 
-                "borderRadius": "12px",
-                "borderLeft": "4px solid #732dd3",
-                "boxShadow": "0 2px 8px rgba(0,0,0,0.05)"
-            })
+            # Acumula a pergunta e resposta no histórico
+            chat_history.append({"role": "user", "text": pergunta})
+            chat_history.append({"role": "assistant", "text": resposta})
             
-            return card_resposta, ""
+            return chat_history, render_chat_history_layout(chat_history), ""
         except Exception as e:
-            return dbc.Alert(f"Erro ao processar a IA: {str(e)}", color="danger"), ""
+            error_msg = f"Erro ao processar a IA: {str(e)}"
+            chat_history.append({"role": "user", "text": pergunta})
+            chat_history.append({"role": "system_error", "text": error_msg})
+            return chat_history, render_chat_history_layout(chat_history), ""
 
     # ─── CALLBACK 6: TABELA DE DADOS BRUTOS ─────────────────────────────────────
     @callback(

@@ -201,3 +201,172 @@ body {
     font-size: 11px;
     font-weight: 600;
 }
+
+/* ────────────────────────────────────────────────
+   8. CHAT ASSISTANT (IA)
+   ──────────────────────────────────────────────── */
+
+/* Layout Centralizado */
+.chat-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding-bottom: 120px; /* Respiro extra na parte inferior para a barra fixa flutuante */
+    min-height: calc(100vh - 200px);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+/* Bolhas de Conversa */
+.chat-bubble-user {
+    align-self: flex-end;
+    background: #2b2b2b;
+    color: #ffffff !important;
+    border-radius: 18px 18px 4px 18px;
+    padding: 12px 18px;
+    max-width: 75%;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    font-size: 15px;
+    line-height: 1.5;
+    word-break: break-word;
+}
+
+.chat-bubble-ai {
+    align-self: flex-start;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    color: #1A1D21;
+    border-radius: 18px 18px 18px 4px;
+    padding: 20px;
+    max-width: 85%;
+    margin-bottom: 24px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.03);
+    border-left: 5px solid #732dd3;
+    font-size: 15px;
+    line-height: 1.6;
+    word-break: break-word;
+}
+
+.chat-bubble-ai p:last-child {
+    margin-bottom: 0;
+}
+
+/* Campo de Digitação Fixo na Parte Inferior (Estilo Liquid Glass) */
+.chat-input-sticky {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 48px);
+    max-width: 850px;
+    z-index: 100;
+    padding: 8px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.45);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+}
+
+.chat-input-sticky:focus-within {
+    box-shadow: 0 10px 40px rgba(115, 45, 211, 0.15);
+    background: rgba(255, 255, 255, 0.65);
+    border-color: rgba(115, 45, 211, 0.4);
+}
+
+/* Visual do Estado Vazio (Empty State) */
+.chat-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 60px 20px;
+    margin: auto 0;
+}
+
+.chat-empty-icon {
+    font-size: 40px;
+    color: #732dd3;
+    background: rgba(115, 45, 211, 0.08);
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 24px rgba(115, 45, 211, 0.1);
+    animation: float-slow 4s ease-in-out infinite;
+}
+
+.chat-empty-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1A1D21;
+    margin-bottom: 12px;
+}
+
+.chat-empty-subtitle {
+    font-size: 15px;
+    color: #717680;
+    max-width: 480px;
+    line-height: 1.6;
+    margin-bottom: 32px;
+}
+
+.chat-quick-prompts {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    max-width: 600px;
+    width: 100%;
+}
+
+@media(min-width: 768px) {
+    .chat-quick-prompts {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.chat-prompt-card {
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 12px;
+    padding: 14px 18px;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+}
+
+.chat-prompt-card:hover {
+    background: rgba(255, 255, 255, 0.95);
+    transform: translateY(-2px);
+    border-color: #732dd3;
+    box-shadow: 0 6px 18px rgba(115, 45, 211, 0.08);
+}
+
+.chat-prompt-title {
+    font-weight: 600;
+    font-size: 14px;
+    color: #732dd3;
+    margin-bottom: 4px;
+}
+
+.chat-prompt-desc {
+    font-size: 12px;
+    color: #717680;
+    line-height: 1.4;
+}
+
+@keyframes float-slow {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
